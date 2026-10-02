@@ -35,8 +35,10 @@ def add_features(prices: pd.DataFrame) -> pd.DataFrame:
     data["volume_vs_20d_avg"] = volume / average_volume_20
 
     # Target: 1 if the adjusted close is higher five trading days later.
-    data["target_up_5d"] = (close.shift(-5) > close).astype("int")
+    future_close = close.shift(-5)
+    data["target_up_5d"] = (future_close > close).where(future_close.notna())
 
     # Remove rows without enough history or without a future target.
     data = data.dropna().copy()
+    data["target_up_5d"] = data["target_up_5d"].astype(int)
     return data
